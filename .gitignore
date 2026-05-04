@@ -1,0 +1,18 @@
+# Java/Spring Boot
+*.class
+target/
+*.jar
+
+# React
+node_modules/
+build/
+.env
+
+# Flutter
+.dart_tool/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.iml
