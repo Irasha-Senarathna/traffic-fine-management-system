@@ -1,415 +1,209 @@
 # 🚦 Traffic Fine Management System
 
-## 📌 Project Overview
-
-This system is developed to digitize traffic fine payments in Sri Lanka.
-It allows drivers to pay fines using a **mobile app (on-the-spot)** or **web portal**, while admins monitor collections through a dashboard.
+A full-stack traffic fine management platform built as a group project. The system allows traffic officers to issue fines, citizens to view and pay fines online or via mobile, and administrators to manage the entire system.
 
 ---
 
-# 🏗️ System Architecture
+## 👥 Team Members
 
-Client Applications:
-
-* 📱 Mobile App (Flutter)
-* 🌐 User Web App (React)
-* 🧑‍💼 Admin Portal (React)
-
-⬇ communicate via REST API ⬇
-
-Backend:
-
-* Spring Boot (Java)
-* JWT Authentication
-* MySQL Database
-
-⬇
-
-External Service:
-
-* SMS Notification (Mock / API)
+| Name | Role | Module |
+|------|------|--------|
+| Ira (Irasha) | Backend Developer + GitHub Owner | `backend/` |
+| Niluminda | Frontend Developer | `web-user/` |
+| Kavi | Frontend Developer | `admin-portal/` |
+| Osh | Mobile Developer | `mobile-app/` |
+| Chamo | Documentation + QA Tester | `docs/` |
+| Dimuthu | DevOps + Database | Database Schema + CI/CD |
 
 ---
 
-# ⚙️ Technologies Used
+## 🏗️ Project Structure
 
-## Backend
-
-* Java 17
-* Spring Boot
-* Spring Web
-* Spring Data JPA
-* Spring Security (JWT)
-* MySQL
-
-## Frontend
-
-* React.js
-* Axios (API calls)
-
-## Mobile
-
-* Flutter (Dart)
-
-## Tools
-
-* Git & GitHub
-* Postman
-* IntelliJ IDEA / VS Code
-
----
-
-# 📂 Project Structure
-
-```id="proj-structure"
+```
 traffic-fine-management-system/
 │
-├── backend/
-│   ├── src/main/java/com/traffic/
-│   │   ├── controller/
-│   │   ├── service/
-│   │   ├── repository/
-│   │   ├── model/
-│   │   ├── dto/
-│   │   ├── security/
-│   │   └── config/
-│   └── application.properties
-│
-├── web-user/
-├── admin-portal/
-├── mobile-app/
-├── docs/
-└── README.md
+├── backend/              # Spring Boot REST API
+├── web-user/             # React app for public users
+├── admin-portal/         # React app for admin/officers
+├── mobile-app/           # Flutter mobile app
+├── docs/                 # Project documentation & test cases
+└── README.md             # This file
 ```
 
 ---
 
-# 🚀 HOW TO START (ALL MEMBERS)
+## 🛠️ Tech Stack
 
-## Step 1: Clone Repository
+| Layer | Technology |
+|-------|-----------|
+| Backend | Java 17, Spring Boot 3.x |
+| Frontend (User) | React 18, Axios |
+| Frontend (Admin) | React 18, Axios |
+| Mobile | Flutter 3.x, Dart |
+| Database | MySQL 8.x |
+| Auth | Spring Security + JWT |
+| API Docs | Swagger / OpenAPI |
 
-```id="clone"
-git clone <repo-link>
+---
+
+## 🌐 System Overview
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Web User App  │     │  Admin Portal   │     │   Mobile App    │
+│   (React)       │     │  (React)        │     │   (Flutter)     │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                        │
+         └───────────────────────┼────────────────────────┘
+                                 │  REST API (HTTP/JSON)
+                    ┌────────────▼────────────┐
+                    │   Spring Boot Backend   │
+                    │   Port: 8080            │
+                    └────────────┬────────────┘
+                                 │
+                    ┌────────────▼────────────┐
+                    │      MySQL Database      │
+                    │      Port: 3306          │
+                    └─────────────────────────┘
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites — install these before anything else
+
+- **Java 17+** — [Download](https://www.oracle.com/java/technologies/downloads/)
+- **Maven 3.8+** — [Download](https://maven.apache.org/download.cgi)
+- **Node.js 18+** and **npm** — [Download](https://nodejs.org/)
+- **Flutter 3.x** — [Download](https://flutter.dev/docs/get-started/install)
+- **MySQL 8.x** — [Download](https://dev.mysql.com/downloads/)
+- **Git** — [Download](https://git-scm.com/)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Irasha-Senarathna/traffic-fine-management-system.git
 cd traffic-fine-management-system
 ```
 
-## Step 2: Switch to develop branch
+### 2. Set Up the Database
 
-```id="branch"
-git checkout develop
-git pull origin develop
+```bash
+mysql -u root -p
+```
+```sql
+CREATE DATABASE traffic_fine_db;
+EXIT;
 ```
 
-## Step 3: Create your feature branch
+Then run the schema:
+```bash
+mysql -u root -p traffic_fine_db < docs/database/schema.sql
+```
 
-```id="feature"
-git checkout -b feature/your-task-name
+### 3. Start Each Module
+
+Each module has its own README with detailed setup instructions:
+
+- **Backend** → [`backend/README.md`](./backend/README.md)
+- **Web User App** → [`web-user/README.md`](./web-user/README.md)
+- **Admin Portal** → [`admin-portal/README.md`](./admin-portal/README.md)
+- **Mobile App** → [`mobile-app/README.md`](./mobile-app/README.md)
+- **Docs & Testing** → [`docs/README.md`](./docs/README.md)
+
+---
+
+## 🔗 API Base URL
+
+| Environment | URL |
+|-------------|-----|
+| Local Development | `http://localhost:8080/api` |
+| Swagger UI | `http://localhost:8080/swagger-ui.html` |
+
+---
+
+## 🌿 Git Branching Strategy
+
+We follow a **feature branch workflow**:
+
+```
+main
+ ├── feature/backend-api         (Ira)
+ ├── feature/web-user-frontend   (Niluminda)
+ ├── feature/admin-portal        (Kavi)
+ ├── feature/mobile-app          (Osh)
+ ├── feature/docs                (Chamo)
+ └── feature/database-setup      (Dimuthu)
+```
+
+### Rules
+- ❌ Never commit directly to `main`
+- ✅ Always open a Pull Request and request Ira to review before merging
+- ✅ Pull the latest `main` every morning before starting work
+- ✅ Write clear commit messages: `Add: user login API`, `Fix: payment bug`, `Update: README`
+
+### Daily Workflow
+
+```bash
+# 1. Get latest changes from main
+git pull origin main
+
+# 2. Switch to your branch
+git checkout feature/your-branch-name
+
+# 3. Do your work, then commit
+git add .
+git commit -m "Add: short description of what you did"
+
+# 4. Push to GitHub
+git push origin feature/your-branch-name
+
+# 5. Open a Pull Request on GitHub when ready
 ```
 
 ---
 
-# 👥 TEAM TASKS (DETAILED WITH FILES & TECH)
+## 📋 Core Features
+
+### Public Users (web + mobile)
+- Register and log in with their account
+- View personal fine history by NIC / vehicle number
+- Pay fines online
+- Download fine receipts as PDF
+
+### Traffic Officers / Admins
+- Issue new traffic fines against a vehicle
+- Search fines by vehicle number or NIC
+- Update fine status (paid / unpaid / disputed)
+- View reports and dashboards
 
 ---
 
-# 👑 IRA — Backend Lead + Git Manager
+## 📁 Key API Endpoints (Summary)
 
-## 🔧 Technologies:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | User registration |
+| POST | `/api/auth/login` | Login — returns JWT token |
+| GET | `/api/fines` | Get all fines (admin only) |
+| GET | `/api/fines/user/{id}` | Get fines for a specific user |
+| POST | `/api/fines` | Issue a new fine (officer) |
+| PUT | `/api/fines/{id}/pay` | Mark a fine as paid |
+| GET | `/api/users` | Get all users (admin only) |
+| DELETE | `/api/users/{id}` | Delete a user (admin only) |
 
-* Spring Boot
-* Spring Security (JWT)
-* MySQL
-* JPA
-
-## 📁 Files to Work On:
-
-```
-backend/
-├── config/
-├── security/
-├── controller/AuthController.java
-├── model/User.java
-├── repository/UserRepository.java
-```
-
-## ✅ Tasks:
-
-### 1. Setup Backend Project
-
-* Configure `application.properties`
-* Setup MySQL connection
-
-### 2. Implement Authentication (JWT)
-
-Files:
-
-* `security/JwtUtil.java`
-* `security/JwtFilter.java`
-* `AuthController.java`
-
-Features:
-
-* Register user
-* Login user
-* Generate JWT token
+Full API docs: `http://localhost:8080/swagger-ui.html`
 
 ---
 
-### 3. Define Base Architecture
+## 🐛 Reporting Issues
 
-* Create packages: controller, service, repository
-* Setup global exception handling
-
----
-
-### 4. API Documentation
-
-Create:
-
-```
-docs/api-design.md
-```
+1. Go to the **Issues** tab on GitHub
+2. Click **New Issue**
+3. Describe the bug: what happened, what you expected, steps to reproduce
+4. Assign it to the relevant team member
 
 ---
 
-### 5. Git Management
-
-* Create branches
-* Merge PRs
-* Ensure code quality
-
----
-
-# 👨‍💻 OSH — Backend Developer (Fine + Payment APIs)
-
-## 🔧 Technologies:
-
-* Spring Boot
-* JPA / Hibernate
-
-## 📁 Files:
-
-```
-controller/FineController.java
-controller/PaymentController.java
-service/FineService.java
-service/PaymentService.java
-repository/FineRepository.java
-repository/PaymentRepository.java
-model/Fine.java
-model/Payment.java
-```
-
-## ✅ Tasks:
-
-### 1. Fine Management
-
-* Create fine
-* Fetch fine by reference
-
-### 2. Payment System
-
-* Validate fine
-* Process payment
-* Update status
-
-### 3. Logic Handling
-
-* Prevent duplicate payments
-* Validate inputs
-
----
-
-# 🌐 NILUMINDA — User Web App
-
-## 🔧 Technologies:
-
-* React
-* Axios
-
-## 📁 Files:
-
-```
-web-user/src/
-├── pages/
-│   ├── Login.js
-│   ├── SearchFine.js
-│   ├── Payment.js
-│   └── Success.js
-├── services/api.js
-```
-
-## ✅ Tasks:
-
-### 1. Setup React App
-
-```id="react"
-npx create-react-app web-user
-```
-
-### 2. Implement Pages
-
-* Login page
-* Search fine page
-* Payment page
-* Confirmation page
-
-### 3. API Integration
-
-* Use Axios
-* Connect to backend APIs
-
----
-
-# 🧑‍💼 CHAMO — Admin Portal
-
-## 🔧 Technologies:
-
-* React
-* Chart libraries (optional)
-
-## 📁 Files:
-
-```
-admin-portal/src/
-├── pages/
-│   ├── Dashboard.js
-│   ├── Reports.js
-│   └── Login.js
-```
-
-## ✅ Tasks:
-
-### 1. Dashboard
-
-* Show total payments
-* Show district/category summaries
-
-### 2. Reports
-
-* Payment history table
-
-### 3. Admin Auth
-
-* Secure routes using JWT
-
----
-
-# 📱 DIMUTHU — Mobile App
-
-## 🔧 Technologies:
-
-* Flutter (Dart)
-
-## 📁 Files:
-
-```
-mobile-app/lib/
-├── screens/
-│   ├── login_screen.dart
-│   ├── fine_screen.dart
-│   ├── payment_screen.dart
-│   └── success_screen.dart
-├── services/api_service.dart
-```
-
-## ✅ Tasks:
-
-### 1. Setup Flutter Project
-
-```id="flutter"
-flutter create mobile-app
-```
-
-### 2. Screens
-
-* Login
-* Enter fine reference
-* Payment
-* Confirmation
-
-### 3. API Integration
-
-* Connect with backend
-
----
-
-# 🧪 KAVI — Testing + Documentation
-
-## 🔧 Technologies:
-
-* Postman
-* GitHub Issues
-
-## 📁 Files:
-
-```
-docs/testing.md
-docs/setup-guide.md
-```
-
-## ✅ Tasks:
-
-### 1. API Testing
-
-* Test all endpoints
-* Create Postman collection
-
-### 2. Integration Testing
-
-* Check frontend + backend
-
-### 3. Documentation
-
-* Setup guide
-* API usage guide
-
----
-
-# 🔄 DEVELOPMENT FLOW
-
-```id="flow"
-1. Backend APIs ready
-2. Frontend & Mobile integrate APIs
-3. Testing & bug fixing
-4. Final merge to develop
-5. Merge to main
-```
-
----
-
-# 🔔 SMS FEATURE (MINIMUM REQUIREMENT)
-
-* Simulate SMS sending
-* Print message in console OR use API
-
-Example:
-
-```
-"Payment successful for Fine #1234"
-```
-
----
-
-# 📊 FINAL SUBMISSION CHECKLIST
-
-✔ Backend running
-✔ Web app working
-✔ Mobile app working
-✔ Admin dashboard working
-✔ SMS triggered
-✔ GitHub commits (ALL members)
-✔ Documentation complete
-
----
-
-# 🎯 FINAL NOTE
-
-This project must demonstrate:
-
-* Proper architecture
-* Clean code structure
-* Team collaboration using Git
-* Fully working system
-
----
+*Last updated: May 2026 | Group Project — TFMS Team*
