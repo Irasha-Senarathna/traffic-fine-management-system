@@ -15,13 +15,13 @@ export default function LandingPage() {
         </p>
         <div className="d-flex justify-content-center gap-2">
           <Link to="/login?mode=signin" className="btn btn-primary btn-lg">
-            Login
+            User Login
           </Link>
           <Link
-            to="/login?mode=signup"
-            className="btn btn-outline-secondary btn-lg"
+            to="/login?mode=admin"
+            className="btn btn-outline-danger btn-lg"
           >
-            Register
+            Admin Login
           </Link>
         </div>
       </div>

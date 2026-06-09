@@ -16,7 +16,7 @@ export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container-fluid">
-        <Link className="navbar-brand" to="/">
+        <Link className="navbar-brand" to="/dashboard">
           TrafficFine
         </Link>
         <button
@@ -34,8 +34,13 @@ export default function Navbar() {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <Link className="nav-link" to="/">
+              <Link className="nav-link" to="/dashboard">
                 Home
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/fines/1">
+                Fine Details
               </Link>
             </li>
             <li className="nav-item">
@@ -44,12 +49,12 @@ export default function Navbar() {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/login">
-                Login
+              <Link className="nav-link" to="/payment-success">
+                Payments
               </Link>
             </li>
           </ul>
-          <div className="d-flex">
+          <div className="d-flex align-items-center">
             <button
               type="button"
               className="btn btn-outline-danger btn-sm"

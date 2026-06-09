@@ -9,6 +9,7 @@ import DashboardPage from "./pages/DashboardPage";
 import MyFinesPage from "./pages/MyFinesPage";
 import FineDetailPage from "./pages/FineDetailPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import AdminPage from "./pages/AdminPage";
 import "./App.css";
 
 function AppContent() {
@@ -26,6 +27,7 @@ function AppContent() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="/fines" element={<MyFinesPage />} />
           <Route path="/fines/:id" element={<FineDetailPage />} />
           <Route path="/payment-success" element={<PaymentSuccessPage />} />
