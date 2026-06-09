@@ -18,6 +18,7 @@ public class FineService {
     private final FineRepository fineRepository;
     private final UserRepository userRepository;
 
+    @SuppressWarnings("null")
     public Fine issueFine(FineDTO dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -37,6 +38,7 @@ public class FineService {
         return fineRepository.findAll();
     }
 
+    @SuppressWarnings("null")
     public Fine getFineById(Long id) {
         return fineRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Fine not found"));
@@ -64,6 +66,7 @@ public class FineService {
         return fineRepository.save(fine);
     }
 
+    @SuppressWarnings("null")
     public void deleteFine(Long id) {
         fineRepository.deleteById(id);
     }

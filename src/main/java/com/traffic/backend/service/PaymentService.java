@@ -17,6 +17,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final FineRepository fineRepository;
 
+    @SuppressWarnings("null")
     public Payment processPayment(PaymentDTO dto) {
         Fine fine = fineRepository.findById(dto.getFineId())
                 .orElseThrow(() -> new RuntimeException("Fine not found"));
