@@ -10,9 +10,9 @@ A full-stack traffic fine management platform built as a group project. The syst
 |------|------|--------|
 | Ira (Irasha) | Backend Developer + GitHub Owner | `backend/` |
 | Niluminda | Frontend Developer | `web-user/` |
-| Kavi | Frontend Developer | `admin-portal/` |
-| Osh | Mobile Developer | `mobile-app/` |
-| Chamo | Documentation + QA Tester | `docs/` |
+| Kavindi | Frontend Developer | `admin-portal/` |
+| Oshini | Mobile Developer | `mobile-app/` |
+| Chamodi | Documentation + QA Tester | `docs/` |
 | Dimuthu | DevOps + Database | Database Schema + CI/CD |
 
 ---
@@ -129,11 +129,11 @@ We follow a **feature branch workflow**:
 
 ```
 main
- ├── feature/backend-api         (Ira)
+ ├── feature/backend-api         (Irasha)
  ├── feature/web-user-frontend   (Niluminda)
- ├── feature/admin-portal        (Kavi)
- ├── feature/mobile-app          (Osh)
- ├── feature/docs                (Chamo)
+ ├── feature/admin-portal        (Kavindi)
+ ├── feature/mobile-app          (Oshini)
+ ├── feature/docs                (Chamodi)
  └── feature/database-setup      (Dimuthu)
 ```
 
