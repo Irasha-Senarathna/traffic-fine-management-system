@@ -34,6 +34,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
+    @SuppressWarnings("null")
     public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -47,6 +48,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
+    @SuppressWarnings("null")
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
