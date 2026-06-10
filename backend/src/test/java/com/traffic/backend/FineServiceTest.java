@@ -73,3 +73,6 @@ public class FineServiceTest {
         assertThrows(RuntimeException.class, () -> fineService.getFineById(99L));
     }
 }
+
+
+//refactor
