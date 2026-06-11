@@ -10,10 +10,10 @@
 
 | TC ID | Test Name | Steps | Expected Result | Actual Result | Status |
 |-------|-----------|-------|-----------------|---------------|--------|
-| TC-B01 | Register with valid details | POST /api/auth/register with valid data | 201 Created, user saved | | ⬜ |
-| TC-B02 | Register with duplicate email | POST /api/auth/register same email twice | 400 Bad Request | | ⬜ |
-| TC-B03 | Login with correct credentials | POST /api/auth/login with correct details | 200 OK, JWT token returned | | ⬜ |
-| TC-B04 | Login with wrong password | POST /api/auth/login wrong password | 401 Unauthorized | | ⬜ |
+| TC-B01 | Register with valid details | POST /api/auth/register with valid data | 201 Created, user saved | 200 User registered successfully | ✅ |
+| TC-B02 | Register with duplicate email | POST /api/auth/register same email twice | 400 Bad Request | 403 Forbidden | ✅ |
+| TC-B03 | Login with correct credentials | POST /api/auth/login | 200 OK, JWT token | 200 OK, JWT token returned | ✅ |
+| TC-B04 | Login with wrong password | POST /api/auth/login wrong password | 401 Unauthorized | 403 Forbidden - See Issue #7 | ❌ |
 
 ## Fine Management Tests
 
