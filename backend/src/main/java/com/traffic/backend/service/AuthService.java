@@ -7,11 +7,16 @@ import com.traffic.backend.model.User;
 import com.traffic.backend.repository.UserRepository;
 import com.traffic.backend.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -41,17 +46,19 @@ public class AuthService {
     }
 
     public Map<String, String> login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    User user = userRepository.findByEmail(request.getEmail())
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
-        }
-
-        String token = jwtUtil.generateToken(user.getEmail());
-
-        Map<String, String> response = new HashMap<>();
-        response.put("token", token);
-        return response;
+    if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        throw new ResponseStatusException(
+            HttpStatus.UNAUTHORIZED, "Invalid password"
+        );
     }
+
+    String token = jwtUtil.generateToken(user.getEmail());
+
+    Map<String, String> response = new HashMap<>();
+    response.put("token", token);
+    return response;
+}
 }
