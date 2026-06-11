@@ -8,7 +8,7 @@ A full-stack traffic fine management platform built as a group project. The syst
 
 | Name | Role | Module |
 |------|------|--------|
-| Ira (Irasha) | Backend Developer + GitHub Owner | `backend/` |
+| Irasha | Backend Developer + GitHub Owner | `backend/` |
 | Niluminda | Frontend Developer | `web-user/` |
 | Kavindi | Frontend Developer | `admin-portal/` |
 | Oshini | Mobile Developer | `mobile-app/` |
