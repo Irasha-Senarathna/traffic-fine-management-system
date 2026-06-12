@@ -6,10 +6,12 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
-import MyFinesPage from "./pages/MyFinesPage";
 import FineDetailPage from "./pages/FineDetailPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import PaymentPage from "./pages/PaymentPage";
 import AdminPage from "./pages/AdminPage";
+import UserProfile from "./pages/UserProfile";
+import EditProfile from "./pages/EditProfile";
 import "./App.css";
 
 function AppContent() {
@@ -28,8 +30,10 @@ function AppContent() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="/fines" element={<MyFinesPage />} />
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/profile/edit" element={<EditProfile />} />
           <Route path="/fines/:id" element={<FineDetailPage />} />
+          <Route path="/payments/:fineId" element={<PaymentPage />} />
           <Route path="/payment-success" element={<PaymentSuccessPage />} />
         </Routes>
       </main>

@@ -1,49 +1,60 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { getFinesByUser } from "../services/fineService";
 
-const summary = {
-  total: 12,
-  unpaid: 5,
-  overdue: 2,
-  amountDue: "$320.00",
-};
+function formatCurrency(n) {
+  const num = Number(n) || 0;
+  return `$${num.toFixed(2)}`;
+}
 
-const outstanding = [
-  { id: "F-1001", type: "Speeding", amount: "$50", date: "2026-05-10" },
-  { id: "F-1002", type: "Illegal Parking", amount: "$30", date: "2026-05-12" },
-  { id: "F-1003", type: "Signal Violation", amount: "$40", date: "2026-05-14" },
-];
-
-const recent = [
-  {
-    id: "R-2001",
-    type: "Speeding",
-    location: "A1 Highway",
-    date: "2026-06-01",
-  },
-  { id: "R-2002", type: "Parking", location: "Main St", date: "2026-05-28" },
-];
-
-const payments = [
-  {
-    id: "P-3001",
-    fineId: "F-0999",
-    amount: "$25",
-    date: "2026-05-20",
-    method: "Card",
-  },
-  {
-    id: "P-3002",
-    fineId: "F-1000",
-    amount: "$60",
-    date: "2026-05-22",
-    method: "Online",
-  },
-];
+function getIconForFine(reason) {
+  if (!reason) return "🚔";
+  const r = reason.toLowerCase();
+  if (r.includes("speed")) return "🚗";
+  if (r.includes("park")) return "🅿️";
+  if (r.includes("signal") || r.includes("red")) return "🚦";
+  if (r.includes("overtake") || r.includes("overtaking")) return "↗️";
+  if (r.includes("cut") || r.includes("line")) return "🚧";
+  if (r.includes("u-turn") || r.includes("u turn")) return "🔄";
+  if (r.includes("reckless")) return "⚠️";
+  if (r.includes("helmet")) return "🪖";
+  if (r.includes("seat") || r.includes("belt")) return "🔒";
+  if (r.includes("block")) return "🚫";
+  return "🚔";
+}
 
 export default function DashboardPage() {
+  const [fines, setFines] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const uid = localStorage.getItem("userId");
+    if (!uid) return;
+    setLoading(true);
+    setError(null);
+    getFinesByUser(uid)
+      .then((data) => setFines(data || []))
+      .catch((err) => setError(err?.message || "Failed to load fines"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const totalFines = fines.length;
+  const unpaidAmount = fines.reduce(
+    (s, f) => s + (f.status !== "PAID" ? Number(f.amount) || 0 : 0),
+    0,
+  );
+  const unpaidCount = fines.filter((f) => f.status !== "PAID").length;
+  const highest = fines.reduce((best, f) => {
+    const amt = Number(f.amount) || 0;
+    if (!best || amt > (Number(best.amount) || 0)) return f;
+    return best;
+  }, null);
+
   return (
-    <div>
-      <h1 className="mb-3">Dashboard</h1>
+    <div className="container py-4">
+      <div className="mx-auto" style={{ maxWidth: 1100 }}>
+        <h1 className="mb-3">Dashboard</h1>
 
       {/* Summary row */}
       <div className="row g-3 mb-4 align-items-stretch">
@@ -51,23 +62,15 @@ export default function DashboardPage() {
           <div className="card h-100 shadow-sm">
             <div className="card-body text-center d-flex flex-column justify-content-center">
               <div className="h6 mb-1">Total Fines</div>
-              <div className="display-6 mb-0">{summary.total}</div>
+              <div className="display-6 mb-0">{totalFines}</div>
             </div>
           </div>
         </div>
         <div className="col-6 col-md-3">
-          <div className="card h-100 shadow-sm">
-            <div className="card-body text-center d-flex flex-column justify-content-center">
+          <div className="card h-100 shadow-sm border-danger">
+            <div className="card-body text-center d-flex flex-column justify-content-center bg-danger text-white">
               <div className="h6 mb-1">Unpaid</div>
-              <div className="h3 text-danger mb-0">{summary.unpaid}</div>
-            </div>
-          </div>
-        </div>
-        <div className="col-6 col-md-3">
-          <div className="card h-100 shadow-sm">
-            <div className="card-body text-center d-flex flex-column justify-content-center">
-              <div className="h6 mb-1">Overdue</div>
-              <div className="h3 text-warning mb-0">{summary.overdue}</div>
+              <div className="h3 mb-0">{unpaidCount}</div>
             </div>
           </div>
         </div>
@@ -75,153 +78,94 @@ export default function DashboardPage() {
           <div className="card h-100 shadow-sm">
             <div className="card-body text-center d-flex flex-column justify-content-center">
               <div className="h6 mb-1">Amount Due</div>
-              <div className="h4 mb-0">{summary.amountDue}</div>
+              <div className="h4 mb-0">{formatCurrency(unpaidAmount)}</div>
+            </div>
+          </div>
+        </div>
+        <div className="col-6 col-md-3">
+          <div className="card h-100 shadow-sm">
+            <div className="card-body text-center d-flex flex-column justify-content-center">
+              <div className="h6 mb-1">Highest Fine</div>
+              <div className="h5 mb-0">
+                {highest ? formatCurrency(highest.amount) : "-"}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Outstanding Fines */}
-      <div className="card mb-4">
-        <div className="card-header">Outstanding Fines</div>
-        <ul className="list-group list-group-flush">
-          {outstanding.map((f) => (
-            <li
-              key={f.id}
-              className="list-group-item d-flex justify-content-between align-items-center"
-            >
-              <div>
-                <div className="fw-bold">
-                  {f.id} — {f.type}
-                </div>
-                <div className="small text-muted">Issued: {f.date}</div>
-              </div>
-              <div className="text-end">
-                <div className="fw-semibold">{f.amount}</div>
-                <a className="btn btn-sm btn-link ms-2" href={`/fines/${f.id}`}>
-                  View
-                </a>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+        {error && <div className="text-danger mb-3">{error}</div>}
 
-      {/* Two-column statistics and recent/payment lists */}
-      <div className="row g-3">
-        <div className="col-lg-6">
-          <div className="card mb-3">
-            <div className="card-header">Violation Statistics</div>
-            <div className="card-body">
-              <div className="small text-muted">By type (last 30 days)</div>
-              <ul className="list-unstyled mt-2">
-                <li>Speeding: 7</li>
-                <li>Illegal Parking: 3</li>
-                <li>Signal Violation: 2</li>
+        {loading ? (
+          <div>Loading fines...</div>
+        ) : (
+          <div className="row g-3">
+          <div className="col-lg-8">
+            <div className="card mb-3">
+              <div className="card-header">Outstanding Fines</div>
+              <ul className="list-group list-group-flush">
+                {fines.length === 0 ? (
+                  <li className="list-group-item text-muted">
+                    No fines found.
+                  </li>
+                ) : (
+                  fines.map((f) => (
+                    <li
+                      key={f.id}
+                      className="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <div className="fw-bold">
+                          #{f.id} — {getIconForFine(f.reason)}{" "}
+                          {f.vehiclePlate || "-"}
+                        </div>
+                        <div className="small text-muted">{f.reason}</div>
+                      </div>
+                      <div className="text-end">
+                        <div className="fw-semibold">
+                          {formatCurrency(f.amount)}
+                        </div>
+                        <div className="small text-muted">{f.status}</div>
+                        <div className="mt-2">
+                          {f.status !== "PAID" && (
+                            <Link
+                              to={`/payments/${f.id}`}
+                              className="btn btn-sm btn-primary"
+                            >
+                              Pay
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  ))
+                )}
               </ul>
             </div>
           </div>
 
-          <div className="card mb-3">
-            <div className="card-header">Recent Violations</div>
-            <div className="card-body">
-              {recent.map((r) => (
-                <div
-                  key={r.id}
-                  className="d-flex justify-content-between align-items-center py-2 border-bottom"
-                >
-                  <div>
-                    <div className="fw-bold">{r.type}</div>
-                    <div className="small text-muted">
-                      {r.location} — {r.date}
+          <div className="col-lg-4">
+            <div className="card mb-3">
+              <div className="card-header">Highest Fine</div>
+              <div className="card-body">
+                {highest ? (
+                  <>
+                    <div className="h4 mb-2">
+                      {formatCurrency(highest.amount)}
                     </div>
-                  </div>
-                  <div className="text-end">{r.id}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="col-lg-6">
-          <div className="card mb-3">
-            <div className="card-header">Payment Statistics</div>
-            <div className="card-body">
-              <div className="small text-muted">Last 30 days</div>
-              <div className="mt-2">
-                Total paid: <strong>$1,240</strong>
-              </div>
-              <div className="mt-2">
-                Average payment: <strong>$62</strong>
+                    <div className="small text-muted">Reason</div>
+                    <div className="mb-2">{highest.reason || "-"}</div>
+                    <div className="small text-muted">Issued</div>
+                    <div>{highest.issuedAt || highest.issuedDate || "-"}</div>
+                  </>
+                ) : (
+                  <div className="text-muted">No fines</div>
+                )}
               </div>
             </div>
           </div>
-
-          <div className="card mb-3">
-            <div className="card-header">Payment History</div>
-            <div className="card-body p-0">
-              <div className="table-responsive">
-                <table className="table table-sm mb-0">
-                  <thead>
-                    <tr>
-                      <th>Payment ID</th>
-                      <th>Fine ID</th>
-                      <th>Amount</th>
-                      <th>Date</th>
-                      <th>Method</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {payments.map((p) => (
-                      <tr key={p.id}>
-                        <td>{p.id}</td>
-                        <td>{p.fineId}</td>
-                        <td>{p.amount}</td>
-                        <td>{p.date}</td>
-                        <td>{p.method}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Notifications and Quick Actions */}
-      <div className="row g-3 mt-3">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-header">Notifications</div>
-            <div className="card-body">
-              <ul className="list-unstyled mb-0">
-                <li className="py-2 border-bottom">
-                  Payment due for F-1002 on 2026-06-15
-                </li>
-                <li className="py-2 border-bottom">
-                  New evidence uploaded for F-1003
-                </li>
-                <li className="py-2">System maintenance on 2026-06-20</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-header">Quick Actions</div>
-            <div className="card-body d-flex flex-column gap-2">
-              <button className="btn btn-primary">Pay Outstanding Fines</button>
-              <button className="btn btn-outline-secondary">
-                Download Statement
-              </button>
-              <button className="btn btn-outline-secondary">
-                Contact Support
-              </button>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

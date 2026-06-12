@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  login as authLogin,
+  register as authRegister,
+} from "../services/authService";
 
 export default function LoginPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -27,22 +31,77 @@ export default function LoginPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // No credentials required for now — navigate accordingly
-    if (mode === "admin") {
-      navigate("/admin");
+    setError(null);
+    setLoading(true);
+    if (mode === "signup") {
+      authRegister({ name, nic, email, password })
+        .then((res) => {
+          setLoading(false);
+          // show success and switch to signin
+          setMode("signin");
+          setSearchParams({ mode: "signin" });
+          setInfo(res?.message || "Registered successfully. Please sign in.");
+        })
+        .catch((err) => {
+          setLoading(false);
+          setError(
+            err?.response?.data?.message ||
+              err.message ||
+              "Registration failed",
+          );
+        });
     } else {
-      navigate("/dashboard");
+      authLogin({ email, password })
+        .then((res) => {
+          setLoading(false);
+          if (mode === "admin") {
+            try {
+              localStorage.setItem("isAdmin", "true");
+            } catch (e) {}
+            navigate("/admin");
+          } else {
+            try {
+              localStorage.removeItem("isAdmin");
+            } catch (e) {}
+            navigate("/dashboard");
+          }
+        })
+        .catch((err) => {
+          setLoading(false);
+          setError(
+            err?.response?.data?.message || err.message || "Login failed",
+          );
+        });
     }
   };
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [info, setInfo] = useState(null);
 
   return (
     <div
       className="d-flex align-items-center justify-content-center"
-      style={{ minHeight: "100vh" }}
+      style={{
+        minHeight: "100vh",
+        width: "100%",
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(/swatch_landscape_traffic_june2024_1_1d97.jpg)`,
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center center",
+        backgroundAttachment: "fixed",
+      }}
     >
       <div
-        className={`card shadow-sm p-3 mx-3 ${mode === "admin" ? "border border-danger bg-white" : ""}`}
-        style={{ maxWidth: 380, width: "100%" }}
+        className={`card shadow-sm p-3 mx-3 ${mode === "admin" ? "border border-danger" : ""}`}
+        style={{
+          maxWidth: 380,
+          width: "100%",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+          border: "1px solid rgba(255,255,255,0.18)",
+        }}
       >
         <h2 className={`mb-3 ${mode === "admin" ? "text-danger" : ""}`}>
           {mode === "admin"
@@ -112,9 +171,15 @@ export default function LoginPage() {
               type="submit"
               className={`btn btn-sm ${mode === "admin" ? "btn-danger" : "btn-primary"}`}
             >
-              {mode === "signin" || mode === "admin" ? "Sign in" : "Sign up"}
+              {loading
+                ? "Please wait..."
+                : mode === "signin" || mode === "admin"
+                  ? "Sign in"
+                  : "Sign up"}
             </button>
           </div>
+          {error && <div className="text-danger small mt-2">{error}</div>}
+          {info && <div className="text-success small mt-2">{info}</div>}
           {mode === "signin" && (
             <div className="text-center mt-2">
               <a
