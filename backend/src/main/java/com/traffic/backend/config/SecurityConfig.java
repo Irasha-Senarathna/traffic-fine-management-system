@@ -48,11 +48,18 @@ public class SecurityConfig {
                 })
             )
 
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
-                .anyRequest().authenticated()
-            )
+            
+    .authorizeHttpRequests(auth -> auth
+    .requestMatchers(
+        "/api/auth/**",
+        "/v3/api-docs",
+        "/v3/api-docs/**",
+        "/swagger-ui/**",
+        "/swagger-ui.html",
+        "/swagger-resources/**",
+        "/api-docs/**"
+    ).permitAll()
+    .anyRequest().authenticated())
 
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
