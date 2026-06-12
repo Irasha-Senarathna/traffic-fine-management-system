@@ -1,65 +1,104 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../utils/token_storage.dart';
-
-// ⚠️ CHANGE THIS when testing on real device or when backend is deployed
-// Android Emulator: http://10.0.2.2:8080/api
-// Real device on same WiFi: http://192.168.x.x:8080/api (your PC's local IP)
-const String baseUrl = 'http://10.0.2.2:8080/api';
+import '../utils/constants.dart';
 
 class ApiService {
-  static Future<Map<String, String>> _authHeaders() async {
+  // ---------------------------
+  // HEADERS WITH TOKEN
+  // ---------------------------
+  static Future<Map<String, String>> _headers() async {
     final token = await TokenStorage.getToken();
+
     return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
+      "Content-Type": "application/json",
+      if (token != null) "Authorization": "Bearer $token",
     };
   }
 
-  // ─── AUTH ────────────────────────────────────────────
+  // ---------------------------
+  // LOGIN
+  // ---------------------------
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
+      Uri.parse("${AppConstants.baseUrl}/auth/login"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "email": email,
+        "password": password,
+      }),
     );
-    return jsonDecode(response.body);
-  }
 
-  static Future<Map<String, dynamic>> register(
-      Map<String, dynamic> data) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(data),
-    );
-    return jsonDecode(response.body);
-  }
+    final data = jsonDecode(response.body);
 
-  // ─── FINES ───────────────────────────────────────────
-  static Future<List<FineResult>> getMyFines(String userId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/fines/user/$userId'),
-      headers: await _authHeaders(),
-    );
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => FineResult.success(json)).toList();
+      await TokenStorage.saveToken(data["token"]);
+      await TokenStorage.saveUserId(data["userId"].toString());
     }
-    return [];
+
+    return data;
   }
 
+  // ---------------------------
+  // REGISTER
+  // ---------------------------
+  static Future<Map<String, dynamic>> register(
+      Map<String, dynamic> user) async {
+    final response = await http.post(
+      Uri.parse("${AppConstants.baseUrl}/auth/register"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(user),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // ---------------------------
+  // GET MY FINES
+  // ---------------------------
+  static Future<List<dynamic>> getMyFines(String userId) async {
+    final response = await http.get(
+      Uri.parse("${AppConstants.baseUrl}/fines/user/$userId"),
+      headers: await _headers(),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // ---------------------------
+  // GET FINE BY ID
+  // ---------------------------
+  static Future<Map<String, dynamic>> getFineById(String id) async {
+    final response = await http.get(
+      Uri.parse("${AppConstants.baseUrl}/fines/$id"),
+      headers: await _headers(),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // ---------------------------
+  // PAY FINE
+  // ---------------------------
   static Future<bool> payFine(String fineId) async {
     final response = await http.put(
-      Uri.parse('$baseUrl/fines/$fineId/pay'),
-      headers: await _authHeaders(),
+      Uri.parse("${AppConstants.baseUrl}/fines/$fineId/pay"),
+      headers: await _headers(),
     );
+
     return response.statusCode == 200;
   }
-}
 
-class FineResult {
-  final Map<String, dynamic> data;
-  FineResult.success(this.data);
+  // ---------------------------
+  // GET PAYMENT HISTORY
+  // ---------------------------
+  static Future<List<dynamic>> getPayments(String userId) async {
+    final response = await http.get(
+      Uri.parse("${AppConstants.baseUrl}/payments/$userId"),
+      headers: await _headers(),
+    );
+
+    return jsonDecode(response.body);
+  }
 }
