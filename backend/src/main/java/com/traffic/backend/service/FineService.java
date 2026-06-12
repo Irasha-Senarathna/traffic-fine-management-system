@@ -6,7 +6,10 @@ import com.traffic.backend.model.User;
 import com.traffic.backend.repository.FineRepository;
 import com.traffic.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -61,10 +64,17 @@ public class FineService {
     }
 
     public Fine markAsPaid(Long id) {
-        Fine fine = getFineById(id);
-        fine.setStatus("PAID");
-        return fineRepository.save(fine);
+    Fine fine = getFineById(id);
+
+    if (fine.getStatus().equals("PAID")) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Fine already paid"
+        );
     }
+
+    fine.setStatus("PAID");
+    return fineRepository.save(fine);
+}
 
     @SuppressWarnings("null")
     public void deleteFine(Long id) {
