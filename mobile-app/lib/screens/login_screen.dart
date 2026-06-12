@@ -13,12 +13,16 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
 
   Future<void> _login() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
       setState(() => _errorMessage = 'Please fill in all fields');
       return;
     }
@@ -29,16 +33,34 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final result = await ApiService.login(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
+      final result = await ApiService.login(email, password);
 
-      if (result.containsKey('token')) {
+      // ---------------------------
+      // CHECK TOKEN
+      // ---------------------------
+      if (result['token'] != null) {
         await TokenStorage.saveToken(result['token']);
-        await TokenStorage.saveUserId(result['id'].toString());
-        await TokenStorage.saveUserName(result['name'] ?? '');
-        await TokenStorage.saveUserEmail(result['email'] ?? '');
+
+        // ---------------------------
+        // SAFE USER ID HANDLING
+        // ---------------------------
+        final userId = result['userId'] ??
+            result['id'] ??
+            '';
+
+        if (userId.toString().isNotEmpty) {
+          await TokenStorage.saveUserId(userId.toString());
+        }
+
+        // OPTIONAL FIELDS (only if backend sends them)
+        if (result['name'] != null) {
+          await TokenStorage.saveUserName(result['name']);
+        }
+
+        if (result['email'] != null) {
+          await TokenStorage.saveUserEmail(result['email']);
+        }
+
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, '/dashboard');
       } else {
@@ -48,10 +70,12 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Cannot connect to server. Check your connection.';
+        _errorMessage = 'Cannot connect to server. Check backend.';
       });
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -66,6 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 48),
+
               Center(
                 child: Container(
                   padding: const EdgeInsets.all(20),
@@ -80,24 +105,34 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.traffic, size: 50, color: Colors.white),
+                  child: const Icon(
+                    Icons.traffic,
+                    size: 50,
+                    color: Colors.white,
+                  ),
                 ),
               ),
+
               const SizedBox(height: 32),
+
               const Text(
                 'Welcome Back',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1A2E),
                 ),
               ),
+
               const SizedBox(height: 8),
+
               const Text(
                 'Sign in to manage your fines',
-                style: TextStyle(color: Colors.grey, fontSize: 15),
+                style: TextStyle(color: Colors.grey),
               ),
+
               const SizedBox(height: 32),
+
+              // ERROR BOX
               if (_errorMessage != null)
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -107,39 +142,26 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: Colors.red.shade200),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.error_outline,
-                          color: Colors.red, size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
                   ),
                 ),
+
+              // EMAIL
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Email Address',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade200),
-                  ),
+                  prefixIcon: Icon(Icons.email_outlined),
+                  border: OutlineInputBorder(),
                 ),
               ),
+
               const SizedBox(height: 16),
+
+              // PASSWORD
               TextField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
@@ -147,32 +169,34 @@ class _LoginScreenState extends State<LoginScreen> {
                   labelText: 'Password',
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword
-                        ? Icons.visibility_off
-                        : Icons.visibility),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
                   ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade200),
-                  ),
+                  border: const OutlineInputBorder(),
                 ),
                 onSubmitted: (_) => _login(),
               ),
+
               const SizedBox(height: 24),
+
+              // BUTTON
               CustomButton(
                 text: 'Sign In',
                 onPressed: _login,
                 isLoading: _isLoading,
               ),
+
               const SizedBox(height: 16),
+
+              // REGISTER NAV
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
