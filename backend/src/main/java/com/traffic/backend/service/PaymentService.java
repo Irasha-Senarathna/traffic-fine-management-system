@@ -16,6 +16,7 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final FineRepository fineRepository;
+    private final SmsService smsService;
 
     @SuppressWarnings("null")
     public Payment processPayment(PaymentDTO dto) {
@@ -34,7 +35,16 @@ public class PaymentService {
         fine.setStatus("PAID");
         fineRepository.save(fine);
 
-        return paymentRepository.save(payment);
+        Payment saved = paymentRepository.save(payment);
+
+        try {
+            String officerPhone = fine.getUser() != null ? fine.getUser().getPhone() : null;
+            smsService.sendPaymentConfirmation(officerPhone, fine.getVehiclePlate(), fine.getId());
+        } catch (Exception ignored) {
+            // SMS failure must never roll back a successful payment
+        }
+
+        return saved;
     }
 
     public Payment getPaymentByFine(Long fineId) {
