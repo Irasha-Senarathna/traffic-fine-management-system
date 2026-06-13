@@ -23,6 +23,8 @@ public class User {
 
     private String nic;
 
+    private String phone;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 }
