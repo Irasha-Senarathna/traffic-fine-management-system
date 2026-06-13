@@ -9,8 +9,18 @@ export async function login(payload) {
   const data = res.data;
   if (data && data.token) {
     localStorage.setItem("token", data.token);
-    if (data.userId) {
-      localStorage.setItem("userId", String(data.userId));
+    try {
+      const jwtPayload = JSON.parse(atob(data.token.split(".")[1]));
+      const email = jwtPayload.sub;
+      if (email) {
+        const usersRes = await api.get("/api/users");
+        const match = usersRes.data.find((u) => u.email === email);
+        if (match?.id) {
+          localStorage.setItem("userId", String(match.id));
+        }
+      }
+    } catch (e) {
+      // ignore — profile page will show login prompt
     }
   }
   return data;
