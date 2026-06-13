@@ -10,16 +10,16 @@
 
 | TC ID | Test Name | Steps | Expected Result | Actual Result | Status |
 |-------|-----------|-------|-----------------|---------------|--------|
-| TC-M01 | App opens correctly | Launch app on emulator | Splash screen then login page | | ⬜ |
-| TC-M02 | App opens without internet | Turn off wifi → Launch app | Friendly "No connection" message | | ⬜ |
+| TC-M01 | App opens correctly | Launch app on Chrome | Splash screen then login page | Login page opened successfully | ✅ |
+|| TC-M02 | App opens without internet | Turn off wifi → Launch app | Friendly "No connection" message | Friendly "No internet connection" message displayed | ✅ |
 
 ## Login Tests
 
 | TC ID | Test Name | Steps | Expected Result | Actual Result | Status |
 |-------|-----------|-------|-----------------|---------------|--------|
-| TC-M03 | Login with correct credentials | Enter correct email + password | Navigate to dashboard | | ⬜ |
-| TC-M04 | Login with wrong password | Enter wrong password | Error message shown | | ⬜ |
-| TC-M05 | Login with empty fields | Tap login without filling | Validation errors shown | | ⬜ |
+| TC-M03 | Login with correct credentials | Enter correct email + password | Navigate to dashboard | Successfully logged in | ✅ |
+|| TC-M04 | Login with wrong password | Enter wrong password | Error message shown | Login failed message displayed | ✅ |
+| TC-M05 | Login with empty fields | Tap login without filling | Validation errors shown | "Please fill in all fields" message displayed | ✅ |
 
 ## Fine Payment Tests
 

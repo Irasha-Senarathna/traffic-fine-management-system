@@ -25,14 +25,6 @@
 || TC-B08 | Pay a fine (valid fine ID) | PUT /api/fines/1/pay with token | 200 OK, status PAID | 200 OK, status changed to PAID | ✅ |
 | TC-B09 | Pay already paid fine | PUT /api/fines/2/pay twice | 400 Bad Request | 403 Forbidden | ❌ |
 
-## SMS Notification Tests
-
-| TC ID | Test Name | Steps | Expected Result | Actual Result | Status |
-|-------|-----------|-------|-----------------|---------------|--------|
-| TC-B10 | SMS sent after payment | Complete a payment | Officer receives SMS | | ⬜ |
-| TC-B11 | SMS content check | Check received SMS | Contains fine reference + driver name | | ⬜ |
-| TC-B12 | Invalid phone number | POST /api/sms with invalid number | Error handled gracefully | | ⬜ |
-
 ## Status Key
 ✅ Pass | ❌ Fail | ⬜ Not Tested Yet
 
