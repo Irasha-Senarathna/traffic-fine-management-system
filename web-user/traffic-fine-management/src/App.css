@@ -1,0 +1,7 @@
+/* Cleared default Vite starter App styles */
+/* Use Bootstrap classes for layout and styling. */
+
+/* Ensure footer sticks to bottom when content is short */
+.min-vh-100 {
+  min-height: 100vh;
+}

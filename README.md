@@ -1,9 +1,14 @@
-# 🚦 Traffic Fine Management System
+# 🌐 Web User Frontend — React App
 
-A full-stack traffic fine management platform built as a group project. The system allows traffic officers to issue fines, citizens to view and pay fines online or via mobile, and administrators to manage the entire system.
+**Owner:** Niluminda
+**Branch:** `feature/web-user-frontend`
+**Tech:** React 18, Axios, React Router, TailwindCSS (or Bootstrap)
+
+This is the public-facing web app where registered citizens can log in, view their traffic fines, and pay them online.
 
 ---
 
+<<<<<<< HEAD
 ## 👥 Team Members
 
 | Name | Role | Module |
@@ -18,192 +23,205 @@ A full-stack traffic fine management platform built as a group project. The syst
 ---
 
 ## 🏗️ Project Structure
+=======
+## 📁 Folder Structure
+>>>>>>> feature/web-user-frontend
 
 ```
-traffic-fine-management-system/
-│
-├── backend/              # Spring Boot REST API
-├── web-user/             # React app for public users
-├── admin-portal/         # React app for admin/officers
-├── mobile-app/           # Flutter mobile app
-├── docs/                 # Project documentation & test cases
-└── README.md             # This file
-```
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Backend | Java 17, Spring Boot 3.x |
-| Frontend (User) | React 18, Axios |
-| Frontend (Admin) | React 18, Axios |
-| Mobile | Flutter 3.x, Dart |
-| Database | MySQL 8.x |
-| Auth | Spring Security + JWT |
-| API Docs | Swagger / OpenAPI |
-
----
-
-## 🌐 System Overview
-
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Web User App  │     │  Admin Portal   │     │   Mobile App    │
-│   (React)       │     │  (React)        │     │   (Flutter)     │
-└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
-         │                       │                        │
-         └───────────────────────┼────────────────────────┘
-                                 │  REST API (HTTP/JSON)
-                    ┌────────────▼────────────┐
-                    │   Spring Boot Backend   │
-                    │   Port: 8080            │
-                    └────────────┬────────────┘
-                                 │
-                    ┌────────────▼────────────┐
-                    │      MySQL Database      │
-                    │      Port: 3306          │
-                    └─────────────────────────┘
+web-user/
+├── public/
+│   └── index.html
+├── src/
+│   ├── components/
+│   │   ├── Navbar.jsx               # Top navigation bar
+│   │   ├── Footer.jsx               # Page footer
+│   │   └── FineCard.jsx             # Card to display a single fine
+│   ├── pages/
+│   │   ├── LandingPage.jsx          # Home / welcome page
+│   │   ├── LoginPage.jsx            # Login form
+│   │   ├── RegisterPage.jsx         # Registration form
+│   │   ├── DashboardPage.jsx        # User dashboard after login
+│   │   ├── MyFinesPage.jsx          # View list of user's fines
+│   │   ├── FineDetailPage.jsx       # Single fine details + pay button
+│   │   └── PaymentSuccessPage.jsx   # Confirmation after payment
+│   ├── services/
+│   │   └── api.js                   # Axios instance + all API calls
+│   ├── context/
+│   │   └── AuthContext.jsx          # JWT token storage & user state
+│   ├── App.jsx                      # Routes setup
+│   └── main.jsx                     # React entry point
+├── .env                             # API base URL (do not commit secrets)
+├── package.json
+└── README.md                        # This file
 ```
 
 ---
 
-## 🚀 Getting Started
+## ⚙️ Setup Instructions
 
-### Prerequisites — install these before anything else
-
-- **Java 17+** — [Download](https://www.oracle.com/java/technologies/downloads/)
-- **Maven 3.8+** — [Download](https://maven.apache.org/download.cgi)
-- **Node.js 18+** and **npm** — [Download](https://nodejs.org/)
-- **Flutter 3.x** — [Download](https://flutter.dev/docs/get-started/install)
-- **MySQL 8.x** — [Download](https://dev.mysql.com/downloads/)
-- **Git** — [Download](https://git-scm.com/)
-
-### 1. Clone the Repository
+### Step 1 — Install Dependencies
 
 ```bash
-git clone https://github.com/Irasha-Senarathna/traffic-fine-management-system.git
-cd traffic-fine-management-system
+# Go into the web-user folder
+cd web-user
+
+# Install all packages
+npm install
 ```
 
-### 2. Set Up the Database
+### Step 2 — Configure API URL
+
+Create a `.env` file inside the `web-user/` folder:
+
+```env
+VITE_API_BASE_URL=http://localhost:8080/api
+```
+
+> ⚠️ Make sure Ira has the backend running on port 8080 before starting the frontend.
+
+### Step 3 — Run the App
 
 ```bash
-mysql -u root -p
-```
-```sql
-CREATE DATABASE traffic_fine_db;
-EXIT;
+npm run dev
 ```
 
-Then run the schema:
-```bash
-mysql -u root -p traffic_fine_db < docs/database/schema.sql
-```
-
-### 3. Start Each Module
-
-Each module has its own README with detailed setup instructions:
-
-- **Backend** → [`backend/README.md`](./backend/README.md)
-- **Web User App** → [`web-user/README.md`](./web-user/README.md)
-- **Admin Portal** → [`admin-portal/README.md`](./admin-portal/README.md)
-- **Mobile App** → [`mobile-app/README.md`](./mobile-app/README.md)
-- **Docs & Testing** → [`docs/README.md`](./docs/README.md)
+The app will open at: `http://localhost:5173`
 
 ---
 
-## 🔗 API Base URL
-
-| Environment | URL |
-|-------------|-----|
-| Local Development | `http://localhost:8080/api` |
-| Swagger UI | `http://localhost:8080/swagger-ui.html` |
-
----
-
-## 🌿 Git Branching Strategy
-
-We follow a **feature branch workflow**:
-
-```
-main
- ├── feature/backend-api         (Irasha)
- ├── feature/web-user-frontend   (Niluminda)
- ├── feature/admin-portal        (Kavindi)
- ├── feature/mobile-app          (Oshini)
- ├── feature/docs                (Chamodi)
- └── feature/database-setup      (Dimuthu)
-```
-
-### Rules
-- ❌ Never commit directly to `main`
-- ✅ Always open a Pull Request and request Ira to review before merging
-- ✅ Pull the latest `main` every morning before starting work
-- ✅ Write clear commit messages: `Add: user login API`, `Fix: payment bug`, `Update: README`
-
-### Daily Workflow
+## 📦 Dependencies to Install
 
 ```bash
-# 1. Get latest changes from main
-git pull origin main
+npm install axios react-router-dom
+npm install tailwindcss   # or: npm install bootstrap
+```
 
-# 2. Switch to your branch
-git checkout feature/your-branch-name
+Add these to your `package.json` or install them one by one.
 
-# 3. Do your work, then commit
-git add .
-git commit -m "Add: short description of what you did"
+---
 
-# 4. Push to GitHub
-git push origin feature/your-branch-name
+## 🔌 Connecting to the Backend API
 
-# 5. Open a Pull Request on GitHub when ready
+All API calls should go through a single file: `src/services/api.js`
+
+```javascript
+// src/services/api.js
+import axios from 'axios';
+
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+});
+
+// Automatically attach JWT token to every request
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Auth
+export const loginUser = (data) => API.post('/auth/login', data);
+export const registerUser = (data) => API.post('/auth/register', data);
+
+// Fines
+export const getMyFines = (userId) => API.get(`/fines/user/${userId}`);
+export const getFineById = (fineId) => API.get(`/fines/${fineId}`);
+
+// Payments
+export const payFine = (fineId) => API.put(`/fines/${fineId}/pay`);
 ```
 
 ---
 
-## 📋 Core Features
+## 🔐 Handling Login (JWT Token)
 
-### Public Users (web + mobile)
-- Register and log in with their account
-- View personal fine history by NIC / vehicle number
-- Pay fines online
-- Download fine receipts as PDF
+After a successful login response, save the token to localStorage:
 
-### Traffic Officers / Admins
-- Issue new traffic fines against a vehicle
-- Search fines by vehicle number or NIC
-- Update fine status (paid / unpaid / disputed)
-- View reports and dashboards
-
----
-
-## 📁 Key API Endpoints (Summary)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | User registration |
-| POST | `/api/auth/login` | Login — returns JWT token |
-| GET | `/api/fines` | Get all fines (admin only) |
-| GET | `/api/fines/user/{id}` | Get fines for a specific user |
-| POST | `/api/fines` | Issue a new fine (officer) |
-| PUT | `/api/fines/{id}/pay` | Mark a fine as paid |
-| GET | `/api/users` | Get all users (admin only) |
-| DELETE | `/api/users/{id}` | Delete a user (admin only) |
-
-Full API docs: `http://localhost:8080/swagger-ui.html`
+```javascript
+// In LoginPage.jsx
+const handleLogin = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await loginUser({ email, password });
+    localStorage.setItem('token', response.data.token);
+    localStorage.setItem('userId', response.data.userId);
+    navigate('/dashboard');
+  } catch (error) {
+    setError('Invalid email or password');
+  }
+};
+```
 
 ---
 
-## 🐛 Reporting Issues
+## 🗺️ Page Routes
 
-1. Go to the **Issues** tab on GitHub
-2. Click **New Issue**
-3. Describe the bug: what happened, what you expected, steps to reproduce
-4. Assign it to the relevant team member
+Set up in `App.jsx`:
+
+```jsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/fines" element={<MyFinesPage />} />
+        <Route path="/fines/:id" element={<FineDetailPage />} />
+        <Route path="/payment-success" element={<PaymentSuccessPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
 
 ---
 
-*Last updated: May 2026 | Group Project — TFMS Team*
+## 📱 Pages to Build
+
+| Page | What It Shows |
+|------|--------------|
+| Landing Page | Welcome message, login / register buttons |
+| Login | Email + password form |
+| Register | Name, email, password, NIC, phone number |
+| Dashboard | Welcome message, fine count summary, quick links |
+| My Fines | Table of all fines (fine number, date, amount, status) |
+| Fine Detail | Full details of one fine + "Pay Now" button |
+| Payment Success | Confirmation message after paying |
+
+---
+
+## ✅ Niluminda's Task Checklist
+
+- [ ] Initialize React project with Vite (`npm create vite@latest`)
+- [ ] Set up React Router with all pages
+- [ ] Build the Login and Register pages
+- [ ] Connect login to backend API and save JWT token
+- [ ] Build Dashboard page (show fine count, user info)
+- [ ] Build My Fines page (fetch and display fines)
+- [ ] Build Fine Detail page (show one fine, add Pay button)
+- [ ] Connect Pay button to backend payment API
+- [ ] Build Payment Success confirmation page
+- [ ] Add Navbar and Footer components
+- [ ] Basic styling (Tailwind or Bootstrap)
+- [ ] Handle loading states and error messages
+
+---
+
+## 🐛 Common Issues
+
+**API call fails with CORS error:**
+- Tell Ira to add CORS config in the Spring Boot backend
+- Ira needs to allow `http://localhost:5173` in the backend CORS settings
+
+**Token not being sent:**
+- Check that `localStorage.getItem('token')` is not returning null
+- Make sure you saved the token after login
+
+**Page not found after refresh:**
+- This is a React Router issue in development — it's normal, don't worry about it yet

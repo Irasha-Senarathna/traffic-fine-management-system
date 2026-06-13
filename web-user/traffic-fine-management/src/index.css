@@ -1,0 +1,15 @@
+/* Cleared default Vite starter CSS. Keep minimal base reset. */
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: #fff;
+  color: #111;
+}
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
