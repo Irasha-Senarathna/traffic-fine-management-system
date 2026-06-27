@@ -1,15 +1,42 @@
-/* Cleared default Vite starter CSS. Keep minimal base reset. */
-* {
-  box-sizing: border-box;
+@import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --crimson:    #8B1A2D;
+  --crimson-dk: #6B1222;
+  --gold:       #C49B0E;
+  --ink:        #1C1917;
+  --paper:      #F7F4EE;
+  --paper-dk:   #EDEADF;
+  --white:      #FFFFFF;
+  --rule:       #D4C9B5;
+  --slate:      #57534E;
+  --muted:      #9C9289;
+  --success:    #166534;
+  --success-bg: #F0FDF4;
+  --danger:     #991B1B;
+  --danger-bg:  #FEF2F2;
+  --warning:    #92400E;
+  --warning-bg: #FFFBEB;
 }
+
+html, body { min-height: 100%; }
+#root { min-height: 100vh; display: flex; flex-direction: column; }
+
 body {
-  margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  background: #fff;
-  color: #111;
+  font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
