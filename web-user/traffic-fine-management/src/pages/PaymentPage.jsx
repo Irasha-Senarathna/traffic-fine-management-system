@@ -1,123 +1,210 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { processPayment, getPaymentByFine } from "../services/paymentService";
-import {
-  getFineById as fetchFine,
-  getFinesByUser,
-} from "../services/fineService";
+import { processPayment, getPaymentByFine, createStripeSession } from "../services/paymentService";
+import { getFineById as fetchFine, getFinesByUser } from "../services/fineService";
+
+function formatLKR(n) {
+  const num = Number(n) || 0;
+  return `LKR ${num.toLocaleString("en-LK", { minimumFractionDigits: 0 })}`;
+}
+
+function DetailRow({ label, value, mono = false }) {
+  return (
+    <div style={{ marginBottom: 18 }}>
+      <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--muted)", marginBottom: 4 }}>
+        {label}
+      </div>
+      <div style={{
+        fontSize: 14, color: "var(--ink)",
+        fontFamily: mono ? "'IBM Plex Mono', monospace" : "'IBM Plex Sans', sans-serif",
+      }}>
+        {value}
+      </div>
+    </div>
+  );
+}
 
 export default function PaymentPage() {
   const { fineId } = useParams();
   const navigate = useNavigate();
   const [fine, setFine] = useState(null);
-  const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!fineId) return;
     fetchFine(fineId)
-      .then((f) => {
-        setFine(f);
-        setAmount(String(f?.amount || ""));
-      })
+      .then((f) => setFine(f))
       .catch((err) => setError(err?.message || "Failed to load fine"));
   }, [fineId]);
 
   function handleSubmit(e) {
     e.preventDefault();
     setError(null);
-    const dto = { fineId: Number(fineId), amount: Number(amount) };
     setLoading(true);
-    processPayment(dto)
-      .then(() => navigate("/payment-success"))
-      .catch((err) =>
-        setError(
-          err?.response?.data?.message || err.message || "Payment failed",
-        ),
-      )
-      .finally(() => setLoading(false));
+    createStripeSession(Number(fineId))
+      .then((res) => {
+        if (res.checkoutUrl) {
+          window.location.href = res.checkoutUrl;
+        } else {
+          throw new Error("Stripe checkout URL not returned");
+        }
+      })
+      .catch((err) => {
+        setError(err?.response?.data?.message || err.message || "Failed to initiate Stripe payment");
+        setLoading(false);
+      });
   }
 
-  return (
-    <div>
-      <h1 className="mb-3">Pay Fine</h1>
-      {error && <div className="text-danger mb-2">{error}</div>}
-      {!fine ? (
-        <div>Loading fine...</div>
-      ) : (
-        <div className="row">
-          <div className="col-md-6">
-            <div className="card mb-3">
-              <div className="card-body">
-                <h5 className="card-title">Fine #{fine.id}</h5>
-                <div className="mb-2">
-                  <strong>Vehicle:</strong> {fine.vehiclePlate || "-"}
-                </div>
-                <div className="mb-2">
-                  <strong>Reason:</strong> {fine.reason}
-                </div>
-                <div className="mb-2">
-                  <strong>Status:</strong> {fine.status}
-                </div>
-                <div className="mb-2">
-                  <strong>Amount:</strong> $
-                  {Number(fine.amount || 0).toFixed(2)}
-                </div>
-              </div>
-            </div>
-          </div>
+  const statusColor = fine?.status === "PAID" ? "var(--success)" : fine?.status === "PENDING" ? "var(--warning)" : "var(--danger)";
 
-          <div className="col-md-6">
-            <div className="card mb-3">
-              <div className="card-header">Payment</div>
-              <div className="card-body">
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-2">
-                    <label className="form-label">Amount</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      className="form-control"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                    />
+  return (
+    <div style={{ minHeight: "calc(100vh - 62px)", background: "var(--paper)", padding: "36px 24px", fontFamily: "'IBM Plex Sans', sans-serif", color: "var(--ink)" }}>
+      <div style={{ maxWidth: 960, margin: "0 auto" }}>
+
+        <div style={{ marginBottom: 32, paddingBottom: 20, borderBottom: "1px solid var(--rule)" }}>
+          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1.8, textTransform: "uppercase", color: "var(--crimson)", marginBottom: 8 }}>
+            Online Payment
+          </div>
+          <h1 style={{ fontFamily: "'PT Serif', 'Georgia', serif", fontSize: 28, fontWeight: 700, color: "var(--ink)", lineHeight: 1.2 }}>
+            Resolve Traffic Fine
+          </h1>
+          <p style={{ marginTop: 8, fontSize: 14, color: "var(--slate)" }}>
+            Review violation details and proceed to the secure payment gateway.
+          </p>
+        </div>
+
+        {error && (
+          <div style={{ background: "var(--danger-bg)", border: "1px solid #FECACA", borderRadius: 3, padding: "12px 16px", color: "var(--danger)", fontSize: 14, marginBottom: 24 }}>
+            {error}
+          </div>
+        )}
+
+        {!fine ? (
+          <div style={{ textAlign: "center", padding: 60, color: "var(--muted)", fontSize: 14 }}>
+            Loading fine details…
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, alignItems: "start" }} className="payment-grid">
+
+            {/* Left: Fine Details */}
+            <div style={{ background: "var(--white)", border: "1px solid var(--rule)", borderRadius: 3, overflow: "hidden" }}>
+              <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--rule)" }}>
+                <span style={{ fontFamily: "'PT Serif', serif", fontSize: 15, fontWeight: 700, color: "var(--ink)" }}>
+                  Violation Overview
+                </span>
+              </div>
+              <div style={{ padding: "20px 20px 4px" }}>
+                <DetailRow label="Fine Reference" value={`#${fine.id}`} mono />
+                <DetailRow label="Vehicle Plate"  value={fine.vehiclePlate || "—"} />
+                <DetailRow label="Reason / Offence" value={fine.reason || fine.fineCategory || "—"} />
+                {fine.district && <DetailRow label="Location" value={fine.district} />}
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--muted)", marginBottom: 4 }}>
+                    Fine Amount
                   </div>
-                  <div className="mb-2">
-                    <label className="form-label">Payment Method</label>
-                    <select className="form-select">
-                      <option>Card</option>
-                      <option>Online</option>
-                      <option>Cash</option>
-                    </select>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 22, fontWeight: 500, color: "var(--ink)", lineHeight: 1 }}>
+                    {formatLKR(fine.amount)}
                   </div>
-                  <div className="d-grid">
-                    <button
-                      className="btn btn-primary"
-                      type="submit"
-                      disabled={loading}
-                    >
-                      {loading ? "Processing..." : "Pay Now"}
-                    </button>
+                </div>
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--muted)", marginBottom: 4 }}>
+                    Status
                   </div>
-                </form>
+                  <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: statusColor }}>
+                    {fine.status || "UNPAID"}
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="card">
-              <div className="card-header">My Fines (paid & unpaid)</div>
-              <div className="card-body">
-                <PaidList
-                  userFineId={
-                    fine.user?.id ||
-                    fine.userId ||
-                    localStorage.getItem("userId")
-                  }
-                />
+
+            {/* Right: Payment + History */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {/* Payment card */}
+              <div style={{ background: "var(--white)", border: "1px solid var(--rule)", borderRadius: 3, overflow: "hidden" }}>
+                <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--rule)" }}>
+                  <span style={{ fontFamily: "'PT Serif', serif", fontSize: 15, fontWeight: 700, color: "var(--ink)" }}>
+                    Secure Payment Gateway
+                  </span>
+                </div>
+                <div style={{ padding: "20px" }}>
+                  <form onSubmit={handleSubmit}>
+                    <div style={{ marginBottom: 18 }}>
+                      <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--muted)", marginBottom: 6 }}>
+                        Amount (LKR)
+                      </div>
+                      <div style={{
+                        padding: "9px 0", borderBottom: "1.5px solid var(--rule)",
+                        fontFamily: "'IBM Plex Mono', monospace", fontSize: 16, fontWeight: 500, color: "var(--ink)",
+                      }}>
+                        {formatLKR(fine.amount)}
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: 18 }}>
+                      <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--muted)", marginBottom: 6 }}>
+                        Payment Method
+                      </div>
+                      <div style={{
+                        padding: "10px 0", borderBottom: "1.5px solid var(--rule)",
+                        fontSize: 14, fontWeight: 500, color: "var(--ink)",
+                        display: "flex", alignItems: "center", gap: 8,
+                      }}>
+                        <span>💳</span> Stripe Checkout (Sandbox)
+                      </div>
+                    </div>
+
+                    <div style={{
+                      fontSize: 12, color: "var(--slate)", lineHeight: 1.65,
+                      background: "var(--paper)", border: "1px solid var(--rule)",
+                      borderLeft: "3px solid var(--gold)",
+                      borderRadius: 3, padding: "10px 14px", marginBottom: 20,
+                    }}>
+                      You will be redirected to the Stripe Developer sandbox to simulate a card transaction safely.
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading || fine.status === "PAID"}
+                      style={{
+                        width: "100%", padding: "12px",
+                        borderRadius: 3, border: "none",
+                        background: (loading || fine.status === "PAID") ? "var(--rule)" : "var(--crimson)",
+                        color: "#fff", fontWeight: 600, fontSize: 14,
+                        fontFamily: "'IBM Plex Sans', sans-serif",
+                        cursor: (loading || fine.status === "PAID") ? "not-allowed" : "pointer",
+                        letterSpacing: 0.3, transition: "background .15s",
+                      }}
+                      onMouseEnter={(e) => { if (!loading && fine.status !== "PAID") e.currentTarget.style.background = "var(--crimson-dk)"; }}
+                      onMouseLeave={(e) => { if (!loading && fine.status !== "PAID") e.currentTarget.style.background = "var(--crimson)"; }}
+                    >
+                      {loading ? "Redirecting…" : fine.status === "PAID" ? "Already Paid" : "Pay via Stripe"}
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              {/* Payment history */}
+              <div style={{ background: "var(--white)", border: "1px solid var(--rule)", borderRadius: 3, overflow: "hidden" }}>
+                <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--rule)" }}>
+                  <span style={{ fontFamily: "'PT Serif', serif", fontSize: 15, fontWeight: 700, color: "var(--ink)" }}>
+                    My Payment History
+                  </span>
+                </div>
+                <div style={{ padding: "16px 20px" }}>
+                  <PaidList userFineId={fine.user?.id || fine.userId || localStorage.getItem("userId")} />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      <style>{`
+        @media (max-width: 700px) {
+          .payment-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -131,73 +218,46 @@ function PaidList({ userFineId }) {
     const uid = userFineId || localStorage.getItem("userId");
     if (!uid) return;
     setLoadingPaid(true);
-    setErr(null);
-
     getFinesByUser(uid)
       .then(async (fines) => {
-        if (!fines || fines.length === 0) {
-          setPaid([]);
-          return;
-        }
+        if (!fines || fines.length === 0) { setPaid([]); return; }
         const checks = await Promise.all(
           fines.map(async (f) => {
-            try {
-              const p = await getPaymentByFine(f.id);
-              return { fine: f, payment: p };
-            } catch (e) {
-              return { fine: f, payment: null };
-            }
-          }),
+            try { const p = await getPaymentByFine(f.id); return { fine: f, payment: p }; }
+            catch { return { fine: f, payment: null }; }
+          })
         );
-        setPaid(checks || []);
+        setPaid(checks.filter((c) => c.payment !== null));
       })
-      .catch((e) => setErr(e?.message || "Failed"))
+      .catch((e) => setErr(e?.message || "Failed to load history"))
       .finally(() => setLoadingPaid(false));
   }, [userFineId]);
 
-  if (loadingPaid) return <div>Loading paid fines...</div>;
-  if (err) return <div className="text-danger">{err}</div>;
-  if (!paid || paid.length === 0)
-    return <div className="text-muted">No paid fines found.</div>;
+  if (loadingPaid) return <div style={{ fontSize: 12, color: "var(--muted)" }}>Loading history…</div>;
+  if (err)         return <div style={{ fontSize: 12, color: "var(--danger)" }}>{err}</div>;
+  if (!paid.length) return <div style={{ fontSize: 12, color: "var(--muted)" }}>No paid fines recorded yet.</div>;
 
   return (
-    <ul className="list-group list-group-flush">
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {paid.map(({ fine: f, payment }) => (
-        <li
-          key={f.id}
-          className="list-group-item d-flex justify-content-between align-items-center"
-        >
+        <div key={f.id} style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "10px 14px",
+          background: "var(--paper)", border: "1px solid var(--rule)", borderRadius: 3,
+        }}>
           <div>
-            <div className="fw-bold">
-              #{f.id} — {f.vehiclePlate || "-"}
-            </div>
-            <div className="small text-muted">{f.reason}</div>
-            {payment && payment.paidAt && (
-              <div className="small text-muted">
-                Paid at: {new Date(payment.paidAt).toLocaleString()}
+            <div style={{ fontWeight: 500, fontSize: 13 }}>Fine #{f.id} — {f.vehiclePlate || "—"}</div>
+            {payment?.paidAt && (
+              <div style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: "var(--muted)", marginTop: 2 }}>
+                {new Date(payment.paidAt).toLocaleDateString("en-LK")}
               </div>
             )}
           </div>
-          <div className="text-end">{Number(f.amount || 0).toFixed(2)}</div>
-        </li>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 500, fontSize: 13, color: "var(--success)" }}>
+            {formatLKR(f.amount)}
+          </div>
+        </div>
       ))}
-    </ul>
+    </div>
   );
-}
-
-function severityForAmount(amount) {
-  const a = Number(amount || 0);
-  if (a <= 50) return "Low";
-  if (a <= 200) return "Medium";
-  return "High";
-}
-
-function consequenceText(severity, daysOverdue) {
-  if (daysOverdue > 0) {
-    return `Overdue: may incur additional penalties and collection actions after ${daysOverdue} days`;
-  }
-  if (severity === "High")
-    return "High severity: may lead to legal action if unpaid.";
-  if (severity === "Medium") return "Medium severity: late fees may apply.";
-  return "Low severity: prompt payment avoids reminders.";
 }

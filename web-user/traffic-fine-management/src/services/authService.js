@@ -12,6 +12,12 @@ export async function login(payload) {
     if (data.userId) {
       localStorage.setItem("userId", String(data.userId));
     }
+    if (data.role) {
+      localStorage.setItem("role", data.role);
+    }
+    if (data.name) {
+      localStorage.setItem("userName", data.name);
+    }
   }
   return data;
 }
@@ -19,9 +25,12 @@ export async function login(payload) {
 export function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("userId");
+  localStorage.removeItem("role");
+  localStorage.removeItem("userName");
   try {
     localStorage.removeItem("isAdmin");
   } catch (e) {}
 }
 
 export default { register, login, logout };
+
