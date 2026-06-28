@@ -1,0 +1,186 @@
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import api from "../services/api";
+
+const PoliceShield = () => (
+  <svg width="32" height="36" viewBox="0 0 30 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M15 2L3 7V16C3 23.5 8.5 29.5 15 31.5C21.5 29.5 27 23.5 27 16V7L15 2Z"
+      fill="rgba(255,255,255,0.15)" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
+    <text x="15" y="23" textAnchor="middle" fill="white" fontSize="13" fontFamily="system-ui, sans-serif">★</text>
+  </svg>
+);
+
+function Field({ id, label, ...inputProps }) {
+  return (
+    <div style={{ marginBottom: 22 }}>
+      <label htmlFor={id} style={{
+        display: "block", fontSize: 10, fontWeight: 600, color: "var(--slate)",
+        marginBottom: 6, letterSpacing: 0.9, textTransform: "uppercase",
+        fontFamily: "'IBM Plex Sans', sans-serif",
+      }}>
+        {label}
+      </label>
+      <input
+        id={id}
+        style={{
+          width: "100%", padding: "9px 0",
+          background: "transparent", border: "none",
+          borderBottom: "1.5px solid var(--rule)",
+          color: "var(--ink)", fontSize: 15,
+          fontFamily: "'IBM Plex Sans', sans-serif",
+          outline: "none", transition: "border-color .15s", boxSizing: "border-box",
+        }}
+        onFocus={(e) => (e.target.style.borderBottomColor = "var(--crimson)")}
+        onBlur={(e) => (e.target.style.borderBottomColor = "var(--rule)")}
+        {...inputProps}
+      />
+    </div>
+  );
+}
+
+export default function PoliceLoginPage() {
+  const [email,    setEmail]    = useState("");
+  const [password, setPassword] = useState("");
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState(null);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res  = await api.post("/api/auth/login", { email, password });
+      const data = res.data;
+
+      if (!data || !data.token) {
+        setError("Invalid response from server.");
+        setLoading(false);
+        return;
+      }
+
+      const role = (data.role || "").toUpperCase();
+      if (role !== "POLICE" && role !== "OFFICER" && role !== "ADMIN") {
+        setError("Access denied. Only Police Officer accounts may use this portal.");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("policeToken",  data.token);
+      localStorage.setItem("policeUserId", String(data.userId || ""));
+      localStorage.setItem("policeName",   data.name || email);
+      localStorage.setItem("policeRole",   role);
+
+      navigate("/police/dashboard");
+    } catch (err) {
+      setError(err?.response?.data?.message || err.message || "Login failed.");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{
+      minHeight: "100vh", background: "var(--paper)",
+      fontFamily: "'IBM Plex Sans', sans-serif",
+      display: "flex", flexDirection: "column",
+    }}>
+      {/* Masthead */}
+      <header style={{ background: "var(--crimson)", borderBottom: "2px solid var(--gold)", padding: "0 24px", flexShrink: 0 }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", height: 60, display: "flex", alignItems: "center", gap: 14 }}>
+          <PoliceShield />
+          <div>
+            <div style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.65)", letterSpacing: 1.5, textTransform: "uppercase", lineHeight: 1 }}>
+              Sri Lanka Police Department
+            </div>
+            <div style={{ fontSize: 13.5, fontWeight: 600, color: "#fff", lineHeight: 1.3, marginTop: 2 }}>
+              Traffic Fine Management System
+            </div>
+          </div>
+          <div style={{ flex: 1 }} />
+          <Link to="/" style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", textDecoration: "none" }}>← Home</Link>
+        </div>
+      </header>
+
+      {/* Body */}
+      <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 20px" }}>
+        <div style={{
+          width: "100%", maxWidth: 400,
+          background: "var(--white)", border: "1px solid var(--rule)",
+          borderRadius: 4, padding: "40px 36px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+        }}>
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: "var(--crimson)", marginBottom: 10 }}>
+              Law Enforcement
+            </div>
+            <h1 style={{ fontFamily: "'PT Serif', 'Georgia', serif", fontSize: 24, fontWeight: 700, color: "var(--ink)", lineHeight: 1.25 }}>
+              Officer Portal Sign In
+            </h1>
+          </div>
+
+          {error && (
+            <div style={{
+              background: "var(--danger-bg)", border: "1px solid #FECACA",
+              borderRadius: 3, padding: "10px 14px",
+              fontSize: 13, color: "var(--danger)", marginBottom: 20,
+            }} role="alert">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} noValidate>
+            <Field
+              id="police-email"
+              label="Badge / Email"
+              type="email"
+              placeholder="officer@police.lk"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoFocus required
+              autoComplete="email"
+            />
+            <Field
+              id="police-password"
+              label="Password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+
+            <button
+              id="police-login-btn"
+              type="submit"
+              disabled={loading}
+              style={{
+                width: "100%", marginTop: 8, padding: "12px",
+                borderRadius: 3, border: "none",
+                background: loading ? "var(--rule)" : "var(--crimson)",
+                color: "#fff", fontWeight: 600, fontSize: 14,
+                fontFamily: "'IBM Plex Sans', sans-serif",
+                cursor: loading ? "not-allowed" : "pointer",
+                letterSpacing: 0.3, transition: "background .15s",
+              }}
+              onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = "var(--crimson-dk)"; }}
+              onMouseLeave={(e) => { if (!loading) e.currentTarget.style.background = "var(--crimson)"; }}
+            >
+              {loading ? "Authenticating…" : "Sign In as Officer"}
+            </button>
+          </form>
+
+          <p style={{ textAlign: "center", marginTop: 28, fontSize: 12, color: "var(--muted)", lineHeight: 1.6 }}>
+            Restricted access — authorised officers only.<br />
+            Unauthorised attempts are logged.
+          </p>
+        </div>
+      </main>
+
+      <footer style={{ borderTop: "1px solid var(--rule)", padding: "14px 24px", textAlign: "center", fontSize: 12, color: "var(--muted)" }}>
+        &copy; {new Date().getFullYear()} Sri Lanka Police Department. All rights reserved.
+      </footer>
+    </div>
+  );
+}
