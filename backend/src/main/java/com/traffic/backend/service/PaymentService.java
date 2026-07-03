@@ -9,6 +9,7 @@ import com.traffic.backend.model.Payment;
 import com.traffic.backend.repository.FineRepository;
 import com.traffic.backend.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,6 +22,9 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final FineRepository fineRepository;
     private final SmsService smsService;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     @SuppressWarnings("null")
     public Payment processPayment(PaymentDTO dto) {
@@ -73,8 +77,8 @@ public class PaymentService {
 
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl("http://localhost:5173/payment-success?session_id={CHECKOUT_SESSION_ID}&fineId=" + fineId)
-                .setCancelUrl("http://localhost:5173/payments/" + fineId)
+                .setSuccessUrl(frontendUrl + "/payment-success?session_id={CHECKOUT_SESSION_ID}&fineId=" + fineId)
+                .setCancelUrl(frontendUrl + "/payments/" + fineId)
                 .addLineItem(
                         SessionCreateParams.LineItem.builder()
                                 .setQuantity(1L)
