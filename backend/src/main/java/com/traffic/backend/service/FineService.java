@@ -23,8 +23,16 @@ public class FineService {
 
     @SuppressWarnings("null")
     public Fine issueFine(FineDTO dto) {
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = null;
+        if (dto.getOwnerNic() != null && !dto.getOwnerNic().trim().isEmpty()) {
+            user = userRepository.findByNic(dto.getOwnerNic().trim())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver with NIC " + dto.getOwnerNic() + " not found"));
+        } else if (dto.getUserId() != null) {
+            user = userRepository.findById(dto.getUserId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Driver's NIC is required to issue a fine");
+        }
 
         Fine fine = new Fine();
         fine.setVehiclePlate(dto.getVehiclePlate());
@@ -33,9 +41,21 @@ public class FineService {
         fine.setStatus("UNPAID");
         fine.setIssuedAt(LocalDateTime.now());
         fine.setUser(user);
+        fine.setDistrict(dto.getDistrict());
+        fine.setFineCategory(dto.getFineCategory() != null && !dto.getFineCategory().trim().isEmpty()
+                ? dto.getFineCategory()
+                : dto.getReason());
+
+        // Link issuing officer if provided
+        if (dto.getOfficerId() != null) {
+            userRepository.findById(dto.getOfficerId())
+                    .ifPresent(fine::setIssuedBy);
+        }
 
         return fineRepository.save(fine);
     }
+
+
 
     public List<Fine> getAllFines() {
         return fineRepository.findAll();

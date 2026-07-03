@@ -23,6 +23,7 @@ public class User {
 
     private String nic;
 
+    /** Phone number used for notify.lk SMS (primarily for police officers) */
     private String phone;
 
     @Enumerated(EnumType.STRING)

@@ -15,6 +15,7 @@ public class Payment {
 
     private Double amount;
     private LocalDateTime paidAt;
+    private String transactionId;
 
     @OneToOne
     @JoinColumn(name = "fine_id")
